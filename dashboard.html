@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PumpFun Bot Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .status.running {
+            background: #27ae60;
+        }
+
+        .status.finished {
+            background: #f39c12;
+        }
+
+        .controls {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .logs-container {
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .log-entry.success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .log-entry.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .log-entry.warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .log-entry.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .token-info {
+            background: #e8f5e8;
+            border: 2px solid #28a745;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+
+        .token-contract {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            word-break: break-all;
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 5px 10px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .copy-btn:hover {
+            background: #2980b9;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .timestamp {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-left: 10px;
+        }
+
+        .auto-refresh {
+            margin-right: 10px;
+        }
+        .btn-start {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+
+        .btn-start:hover {
+            background: linear-gradient(135deg, #45a049, #3d8b40);
+            transform: translateY(-2px);
+        }
+
+        .btn-new-wallet {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            margin-top: 10px;
+        }
+
+        .btn-new-wallet:hover {
+            background: linear-gradient(135deg, #1976D2, #1565C0);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 PumpFun Bot Dashboard</h1>
+            <div class="status" id="botStatus">جاري التحميل...</div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary btn-start" id="startBtn">▶️ تشغيل البوت</button>
+            <button class="btn btn-primary btn-new-wallet" id="newWalletBtn">💰 تشغيل البوت بمحفظة جديدة</button>
+            <button class="btn btn-secondary" onclick="clearLogs()">🗑️ مسح السجلات</button>
+            <button class="btn btn-success" onclick="refreshLogs()">🔄 تحديث</button>
+            <label class="auto-refresh">
+                <input type="checkbox" id="autoRefresh" checked> تحديث تلقائي
+            </label>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalTokens">0</div>
+                <div class="stat-label">عدد العملات المختبرة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalComments">0</div>
+                <div class="stat-label">عدد التعليقات</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="successRate">0%</div>
+                <div class="stat-label">معدل النجاح</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="lastUpdate">--</div>
+                <div class="stat-label">آخر تحديث</div>
+            </div>
+        </div>
+
+        <div class="logs-container" id="logsContainer">
+            <div class="log-entry info">
+                <strong>مرحباً بك في لوحة تحكم البوت</strong>
+                <span class="timestamp">${new Date().toLocaleString('ar-SA')}</span>
+                <br>
+                اضغط على "تشغيل البوت" لبدء البحث عن عملات عشوائية ونشر "مرحباً"
+            </div>
+        </div>
+
+        <!-- Screenshots Section -->
+        <div style="background: white; margin-top: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden;">
+            <div style="background: #2c3e50; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0;">📸 لقطات الشاشة</h2>
+                <button class="btn btn-secondary" onclick="refreshScreenshots()">تحديث الصور</button>
+            </div>
+            <div style="padding: 20px;">
+                <div id="screenshots-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div class="log-entry info">
+                        🔄 اضغط على "تحديث الصور" لرؤية لقطات الشاشة
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let totalTokens = 0;
+        let totalComments = 0;
+        let successfulComments = 0;
+        let currentToken = null;
+
+        // Auto refresh logs every 5 seconds
+        setInterval(() => {
+            if (document.getElementById('autoRefresh').checked) {
+                refreshLogs();
+            }
+        }, 5000);
+
+        function addLog(message, type = 'info') {
+            const logsContainer = document.getElementById('logsContainer');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+
+            const timestamp = new Date().toLocaleString('ar-SA');
+            logEntry.innerHTML = `
+                <strong>${message}</strong>
+                <span class="timestamp">${timestamp}</span>
+            `;
+
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+
+            updateStats();
+        }
+
+        function addTokenInfo(tokenContract) {
+            const logsContainer = document.getElementById('logsContainer');
+            const tokenDiv = document.createElement('div');
+            tokenDiv.className = 'token-info';
+            tokenDiv.innerHTML = `
+                <strong>🎯 عملة جديدة مكتشفة:</strong>
+                <div class="token-contract">
+                    <button class="copy-btn" onclick="copyToClipboard('${tokenContract}')">نسخ</button>
+                    ${tokenContract}
+                </div>
+                <small>يمكنك نسخ عقد العملة للتحقق من التعليق على PumpFun</small>
+            `;
+
+            logsContainer.appendChild(tokenDiv);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+
+            currentToken = tokenContract;
+            totalTokens++;
+            updateStats();
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                addLog('✅ تم نسخ عقد العملة بنجاح', 'success');
+            }).catch(() => {
+                addLog('❌ فشل في نسخ عقد العملة', 'error');
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('totalTokens').textContent = totalTokens;
+            document.getElementById('totalComments').textContent = totalComments;
+
+            const successRate = totalComments > 0 ? Math.round((successfulComments / totalComments) * 100) : 0;
+            document.getElementById('successRate').textContent = successRate + '%';
+
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('ar-SA');
+        }
+
+        async function startBot() {
+            document.getElementById('botStatus').textContent = 'قيد التشغيل';
+            document.getElementById('botStatus').className = 'status running';
+
+            addLog('🚀 بدء تشغيل البوت...', 'info');
+
+            try {
+                const response = await fetch('/start-bot', { method: 'POST' });
+                const data = await response.json();
+
+                if (data.success) {
+                    addLog('✅ تم تشغيل البوت بنجاح', 'success');
+                } else {
+                    addLog('❌ فشل في تشغيل البوت: ' + data.error, 'error');
+                }
+            } catch (error) {
+                addLog('❌ خطأ في الاتصال: ' + error.message, 'error');
+            }
+        }
+
+        function refreshLogs() {
+            fetch('/logs')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success !== false) {
+                        const statusElement = document.getElementById('botStatus');
+                        if (statusElement) {
+                            statusElement.textContent = data.status || 'غير محدد';
+                            statusElement.className = 'status ' + (data.status.includes('قيد التشغيل') ? 'running' : 'finished');
+                        }
+
+                        const logsContainer = document.getElementById('logsContainer');
+                        logsContainer.innerHTML = '';
+
+                        if (Array.isArray(data.logs)) {
+                            data.logs.forEach(log => {
+                                const logDiv = document.createElement('div');
+                                logDiv.className = 'log-entry';
+                                logDiv.textContent = log;
+                                logsContainer.appendChild(logDiv);
+                            });
+                        }
+
+                        logsContainer.scrollTop = logsContainer.scrollHeight;
+                    } else {
+                        console.warn('Logs endpoint returned error:', data);
+                        const statusElement = document.getElementById('botStatus');
+                        if (statusElement) {
+                             statusElement.textContent = data.status || 'خطأ';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error refreshing logs:', error);
+                    const statusElement = document.getElementById('botStatus');
+                    if (statusElement) {
+                        statusElement.textContent = 'خطأ في الاتصال';
+                    }
+                });
+        }
+
+        function refreshScreenshots() {
+            const screenshots = [
+                'بعد-كتابة-التعليق-موبايل.png',
+                'قبل-محاولة-الإرسال-موبايل.png',
+                'النتيجة-النهائية-محفظة-جديدة-موبايل.png',
+                'نجح-النشر-موبايل.png',
+                'خطأ-في-نشر-التعليق-موبايل.png',
+                'لم-يتم-العثور-على-حقل-التعليق-موبايل.png',
+                'الصفحة-الرئيسية-موبايل.png',
+                'صفحة-التوكن-موبايل.png'
+            ];
+
+            const container = document.getElementById('screenshots-container');
+            container.innerHTML = '';
+
+            let foundImages = 0;
+
+            screenshots.forEach(filename => {
+                const img = new Image();
+                img.onload = function() {
+                    foundImages++;
+                    const imgDiv = document.createElement('div');
+                    imgDiv.style.textAlign = 'center';
+                    imgDiv.innerHTML = `
+                        <h4 style="margin-bottom: 10px; color: #2c3e50;">${filename}</h4>
+                        <img src="/images/${filename}" style="max-width: 100%; height: auto; border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" alt="${filename}">
+                        <p style="margin-top: 5px; font-size: 0.8em; color: #666;">انقر للتكبير</p>
+                    `;
+
+                    // Add click to enlarge
+                    imgDiv.querySelector('img').onclick = function() {
+                        window.open(`/images/${filename}`, '_blank');
+                    };
+
+                    container.appendChild(imgDiv);
+                };
+
+                img.onerror = function() {
+                    // Image doesn't exist, skip
+                };
+
+                img.src = `/images/${filename}`;
+            });
+
+            // Show message if no images found after a delay
+            setTimeout(() => {
+                if (foundImages === 0) {
+                    container.innerHTML = '<div class="log-entry warning">⚠️ لم يتم العثور على أي لقطات شاشة حتى الآن</div>';
+                }
+            }, 2000);
+        }
+
+        function processLogMessage(log) {
+            if (log.includes('العملة المختارة:') || log.includes('Selected token:')) {
+                const tokenMatch = log.match(/([A-Za-z0-9]{32,})/);
+                if (tokenMatch) {
+                    addTokenInfo(tokenMatch[1]);
+                }
+            } else if (log.includes('تم العثور على حقل التعليق') || log.includes('Found comment input')) {
+                addLog('✅ تم العثور على حقل التعليق', 'success');
+            } else if (log.includes('تم كتابة: مرحباً') || log.includes('Typed: مرحباً')) {
+                addLog('📝 تم كتابة "مرحباً" في التعليق', 'info');
+                totalComments++;
+            } else if (log.includes('نُشر بنجاح') || log.includes('posted successfully')) {
+                addLog('🎉 تم نشر التعليق بنجاح!', 'success');
+                successfulComments++;
+            } else if (log.includes('تم النقر على زر الاستعداد') || log.includes('Clicked ready button')) {
+                addLog('✅ تم النقر على "أنا مستعد للضخ"', 'success');
+            } else if (log.includes('الانتقال إلى الصفحة الرئيسية') || log.includes('Going to PumpFun homepage')) {
+                addLog('🌐 الانتقال إلى الصفحة الرئيسية لـ PumpFun', 'info');
+            } else if (log.includes('خطأ') || log.includes('Error:')) {
+                addLog('❌ ' + log, 'error');
+            } else if ((log.includes('تم العثور على') || log.includes('Found')) && 
+                      (log.includes('روابط عملات') || log.includes('token links'))) {
+                const countMatch = log.match(/(\d+)/);
+                if (countMatch) {
+                    addLog(`🔍 تم العثور على ${countMatch[1]} روابط عملات`, 'info');
+                }
+            } else if (log.includes('بدء تشغيل') || log.includes('Starting')) {
+                addLog('🚀 بدء تشغيل البوت البسيط...', 'info');
+            } else if (log.trim()) {
+                // Add any other non-empty log
+                addLog(log, 'info');
+            }
+        }
+
+        function clearLogs() {
+            const logsContainer = document.getElementById('logsContainer');
+            logsContainer.innerHTML = `
+                <div class="log-entry info">
+                    <strong>تم مسح السجلات</strong>
+                    <span class="timestamp">${new Date().toLocaleString('ar-SA')}</span>
+                </div>
+            `;
+
+            totalTokens = 0;
+            totalComments = 0;
+            successfulComments = 0;
+            updateStats();
+        }
+
+        // Start bot function
+        async function startBot() {
+            document.getElementById('botStatus').textContent = 'قيد التشغيل';
+            document.getElementById('botStatus').className = 'status running';
+
+            addLog('🚀 بدء تشغيل البوت...', 'info');
+
+            try {
+                const response = await fetch('/start-bot', { method: 'POST' });
+                const data = await response.json();
+
+                if (data.success) {
+                    addLog('✅ تم تشغيل البوت بنجاح', 'success');
+                } else {
+                    addLog('❌ فشل في تشغيل البوت: ' + data.error, 'error');
+                }
+            } catch (error) {
+                addLog('❌ خطأ في الاتصال: ' + error.message, 'error');
+            }
+        }
+
+        // Run bot with new wallet function
+        async function runBotNewWallet() {
+            document.getElementById('botStatus').textContent = 'قيد التشغيل - محفظة جديدة';
+            document.getElementById('botStatus').className = 'status running';
+
+            addLog('🚀 بدء تشغيل البوت بمحفظة جديدة...', 'info');
+
+            try {
+                const response = await fetch('/run-new-wallet', { method: 'POST' });
+                const data = await response.json();
+
+                if (data.success) {
+                    addLog('✅ تم تشغيل البوت بمحفظة جديدة بنجاح', 'success');
+                    if (data.result) {
+                        if (data.result.wallet) {
+                            addLog(`📄 المحفظة: ${data.result.wallet.slice(0, 20)}...`, 'info');
+                        }
+                        if (data.result.tokenAddress) {
+                            addTokenInfo(data.result.tokenAddress);
+                        }
+                        if (data.result.authToken) {
+                            addLog(`🔐 تم الحصول على AuthToken`, 'success');
+                        }
+                    }
+                } else {
+                    addLog('❌ فشل في تشغيل البوت بمحفظة جديدة: ' + (data.error || 'خطأ غير معروف'), 'error');
+                }
+            } catch (error) {
+                addLog('❌ خطأ في الاتصال: ' + error.message, 'error');
+            }
+        }
+
+        // Auto refresh logs every 3 seconds
+        setInterval(() => {
+            if (document.getElementById('autoRefresh').checked) {
+                refreshLogs();
+            }
+        }, 5000);
+
+        // Auto refresh screenshots every 10 seconds
+        setInterval(refreshScreenshots, 10000);
+
+        // Initial load of screenshots
+        refreshScreenshots();
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners
+            const startBtn = document.getElementById('startBtn');
+            const newWalletBtn = document.getElementById('newWalletBtn');
+
+            if (startBtn) {
+                startBtn.addEventListener('click', startBot);
+            }
+
+            if (newWalletBtn) {
+                newWalletBtn.addEventListener('click', runBotNewWallet);
+            }
+
+            // Initialize
+            updateStats();
+            refreshLogs();
+        });
+    </script>
+</body>
+</html>

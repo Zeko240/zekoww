@@ -1,0 +1,39 @@
+{
+    "mode": "single_token_test",
+    "target_token": "2VAUSDG63bc6YSoaVx7KEJvb3rL8ubpHMn2ug5ox9vrv",
+    "delay": {
+        "min": 5000,
+        "max": 15000
+    },
+    "proxy": {
+        "enabled": false,
+        "list": []
+    },
+    "pumpfun": {
+        "baseUrl": "https://pump.fun",
+        "apiUrl": "https://frontend-api.pump.fun"
+    },
+    "solana": {
+        "rpcUrl": "https://api.mainnet-beta.solana.com",
+        "commitment": "confirmed"
+    },
+    "wallets": {
+        "generateCount": 5,
+        "useExisting": true
+    },
+    "comments": {
+        "texts": [
+            "welcome"
+        ],
+        "useImages": false,
+        "imageChance": 0.0
+    },
+    "koth": {
+        "enabled": false,
+        "checkInterval": 30000
+    },
+    "profile": {
+        "generateRandom": true,
+        "avatarService": "https://api.dicebear.com/7.x/avataaars/svg"
+    }
+}
